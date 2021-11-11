@@ -1,0 +1,41 @@
+image: python:3.8
+
+stages:
+    - Test # Run the test suite
+    - Lint # Run a static code analysis (i.e. linting)
+    - Docs # Try building the documentation
+    - Deploy # Test packaging and deployment
+
+before_script:
+    - python -V
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - make install-dev
+
+lint:
+    stage: Lint
+    allow_failure: true
+    script:
+        - make lint
+
+test:
+    stage: Test
+    script:
+        - apt-get update
+        - apt-get install -y libgl1-mesa-dev
+        - make test
+
+docs:
+    stage: Docs
+    allow_failure: true
+    script:
+        - make html
+
+deploy:
+    stage: Deploy
+    script:
+        - make build
+    artifacts:
+        paths:
+            - dist/*.whl
